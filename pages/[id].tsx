@@ -35,7 +35,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, query }) => 
 
 const Test: NextPage<VideoInfo> = (props) => {
 	return (
-		<Layout title={`Tweet ${props.id}`} description={props.description} ogImageURL={props.thumb}>
+		<Layout title={`Video from tweet: ${props.id}`} description={props.description} ogImageURL={props.thumb}>
 			<VideoCard {...props} />
 		</Layout >
 	);

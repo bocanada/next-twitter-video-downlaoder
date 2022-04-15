@@ -11,7 +11,9 @@ export const Layout: FC<{ children: ReactNode; title: string; description: strin
 				{/* Open-Graph stuff */}
 				<meta property="og:title" content={title} />
 				<meta property="og:description" content={description} />
+				<meta property="og:type" content="article" />
 				{ogImageURL && <meta property="og:image" content={ogImageURL} />}
+				{ogImageURL && <meta property="og:image:url" content={ogImageURL} />}
 				{/* Twitter stuff */}
 				<meta property="twitter:title" content={title} />
 				<meta property="twitter:card" content="summary_large_image" />
