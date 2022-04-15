@@ -3,6 +3,7 @@ import { Variants } from '../pages/api/video/[id]';
 import Card from './Card';
 import Video from './Video';
 import styles from '../styles/Home.module.css';
+import { sortGifLast } from '../utils/sort';
 
 export type VideoInfo = {
 	URL: string;
@@ -20,7 +21,8 @@ const VideoCard: FC<VideoInfo> = ({ URL, description, all }) => {
 			<p className={styles.description}>
 				{description}
 			</p>
-			{all.map((v) => (
+			Links:
+			{all.sort(sortGifLast).map((v) => (
 				<a href={v.url} key={v.res}> {v.res}p </a>
 			))}
 		</Card>);

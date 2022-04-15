@@ -2,6 +2,7 @@ import type { GetServerSideProps, NextPage } from 'next';
 import { getVideos } from '../utils/getVideos';
 import { Layout } from '../components/Layout';
 import VideoCard, { VideoInfo } from '../components/VideoCard';
+import { sortGifLast } from '../utils/sort';
 
 type Props = {
 	videoUrl: string;
@@ -17,7 +18,9 @@ export const getServerSideProps: GetServerSideProps = async ({ res, query }) => 
 	const { id } = query;
 	const response = await getVideos(id as string);
 	try {
-		const url = response.videos.reduce((prev, curr) => prev.res > curr.res ? prev : curr).url;
+		// First try filtering reducing without gifs, if after filtering all gifs there are no videos, reduce on all videos
+		const url = (response.videos.filter((v) => v.res != "gif") || response.videos)
+			.reduce((prev, curr) => sortGifLast(prev, curr) === -1 ? prev : curr).url;
 		return {
 			props: {
 				URL: url,
