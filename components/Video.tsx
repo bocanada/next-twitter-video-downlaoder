@@ -32,7 +32,8 @@ const Video: FC<{ src: string; }> = ({ src }) => {
 				onClick={(e) => togglePlay(e.target as HTMLVideoElement).catch(console.error)}
 				src={blobURL}
 				autoPlay
-				muted />
+				muted
+				loop />
 		);
 	}
 	return <h2>Loading...</h2>;
