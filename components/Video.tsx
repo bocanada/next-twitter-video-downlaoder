@@ -13,7 +13,7 @@ const Video: FC<{ src: string; }> = ({ src }) => {
 	const togglePlay = async (el: HTMLVideoElement) => (el.paused ? el.play() : el.pause());
 	useEffect(() => {
 		downloadBlob().catch(console.error);
-	}, [src]);
+	}, [src, downloadBlob]);
 
 	const handleKeyDown = (e: KeyboardEvent<HTMLVideoElement>) => {
 		switch (e.key) {
