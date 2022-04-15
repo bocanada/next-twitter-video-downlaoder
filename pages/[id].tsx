@@ -19,6 +19,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, query }) => 
 				description: response.text,
 				thumb: response.thumbnail,
 				all: response.videos,
+				username: response.username,
 				id: id,
 			},
 		};
@@ -31,7 +32,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, query }) => 
 
 const Test: NextPage<VideoInfo> = (props) => {
 	return (
-		<Layout title={`Video from tweet: ${props.id}`} description={props.description} ogImageURL={props.thumb}>
+		<Layout title={`@${props.username}`} description={props.description} ogImageURL={props.thumb}>
 			<VideoCard {...props} />
 		</Layout >
 	);

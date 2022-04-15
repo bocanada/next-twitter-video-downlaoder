@@ -1,15 +1,10 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { connectToDB, collections, Variants, Data } from '../../../mongo/db';
 
-export type Variants = {
-  bitrate?: number;
-  res: string;
-  content_type: string;
-  url: string;
-};
 
 type TwitterResponse = {
-  extended_entities: {
+  extended_entities?: {
     media: [
       {
         display_url: string;
@@ -35,12 +30,17 @@ type TwitterResponse = {
       }
     ];
   };
+  user: {
+    name: string;
+    screen_name: string;
+  };
   id_str: string;
   text: string;
 };
 
 enum HTTP {
   OK = 200,
+  INTERNAL_ERR = 500,
   BAD_REQUEST = 400,
   NOT_FOUND = 404,
 }
@@ -69,38 +69,27 @@ const get_resolution = (url: string): string => {
   return res !== null ? res[1] : "gif";
 };
 
-export type Data = {
-  error?: string;
-  videos: Variants[];
-  text?: string;
-  thumbnail?: string;
-};
-
-const handler = async (
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) => {
-  if (req.method !== "GET") {
-    return res.status(405).json({ error: "Method not allowed", videos: [] });
-  }
-  const { id } = req.query;
+const validateID = (id: string) => {
   if (!id) {
-    return res.status(HTTP.BAD_REQUEST).json({
+    return {
       error:
         'No id parameter was specified',
       videos: [],
-    });
+    };
   }
   if (id.length < 10) {
-    return res.status(HTTP.BAD_REQUEST).json(
-      {
-        // bad request
-        error: "The id should be numeric and more than 10 digits long.",
-        videos: [],
-      });
+    return {
+      // bad request
+      error: "The id should be numeric and more than 10 digits long.",
+      videos: [],
+    };
   };
+  return null;
+};
+
+const getFromTwitter = async (id: string): Promise<{ status: HTTP, document: Data; }> => {
   const response = await fetch(
-    `https://api.twitter.com/1.1/statuses/show.json?id=${id}&include_entities=true&trim_user=true`,
+    `https://api.twitter.com/1.1/statuses/show.json?id=${id}&include_entities=true`,
     {
       headers: {
         Authorization: `Bearer ${process.env.BEARER_TOKEN}`,
@@ -108,32 +97,79 @@ const handler = async (
     }
   );
   if (!response.ok) {
-    return res.status(response.status).json({
-      error: "Tweet not found.",
-      videos: [],
-    });
+    return {
+      status: response.status, document: {
+        error: "Tweet not found.",
+        videos: [],
+      }
+    };
   }
   const json: TwitterResponse = await response.json();
-  const media = json.extended_entities.media[0];
-  const type = media.type;
+  const media = json.extended_entities?.media[0];
+  const type = media?.type;
   if (!(type === "video" || type === "animated_gif")) {
-    return res.status(HTTP.NOT_FOUND).json({
-      error: "No videos available for specified tweet.",
-      videos: [],
-    });
-  }
-  const videos = media.video_info?.variants;
+    return {
+      status: HTTP.NOT_FOUND, document: {
+        error: "No videos available for specified tweet.",
+        videos: [],
+      }
+    };
+  };
+  const videos = media?.video_info?.variants;
   if (videos === undefined) {
-    return res.status(HTTP.NOT_FOUND).json({
-      error: "No videos available for specified tweet.",
-      videos: [],
-    });
+    return {
+      status: HTTP.NOT_FOUND, document: {
+        error: "No videos available for specified tweet.",
+        videos: [],
+      }
+    };
   }
-  return res.status(HTTP.OK).json({
-    videos: filterVideos(videos),
-    thumbnail: media.media_url_https,
-    text: json.text,
-  });
+  return {
+    status: HTTP.OK, document: {
+      tweetID: id as string,
+      videos: filterVideos(videos),
+      username: json.user.screen_name,
+      thumbnail: media?.media_url_https,
+      text: json.text,
+    }
+  };
+};
+
+type Response = Data | Error;
+
+const handler = async (
+  req: NextApiRequest,
+  res: NextApiResponse<Response>
+) => {
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed", videos: [] });
+  }
+  const { id } = req.query;
+  const error = validateID(id as string);
+  if (error) {
+    res.status(HTTP.BAD_REQUEST).json(error);
+  }
+  // Connect to mongodb <=> collections.tweets is undefined
+  await connectToDB();
+
+  const data = (await collections.tweets?.findOne({ tweetID: id })) as unknown as Data;
+  if (data !== null) {
+    return res.status(200).json(data);
+  }
+
+  try {
+    const { status, document } = await getFromTwitter(id as string);
+    if (status !== HTTP.OK) {
+      return res.status(status).json(document);
+    }
+    const result = await collections.tweets?.insertOne(document);
+    console.log(result);
+
+    return res.status(HTTP.OK).json(document);
+  } catch (e) {
+    return res.status(HTTP.INTERNAL_ERR).json({ error: (e as Error).message, videos: [] });
+
+  }
 };
 
 export default handler;

@@ -1,19 +1,8 @@
-import React, { FC, KeyboardEvent, useEffect, useState } from 'react';
+import React, { FC, KeyboardEvent } from 'react';
 
 const Video: FC<{ src: string; }> = ({ src }) => {
-	const [blobURL, setBlobURL] = useState('');
-
-	const downloadBlob = async () => {
-		const videoResp = await fetch(src);
-		const blob = await videoResp.blob();
-		const blobUrl = URL.createObjectURL(blob);
-		setBlobURL(blobUrl);
-	};
 
 	const togglePlay = async (el: HTMLVideoElement) => (el.paused ? el.play() : el.pause());
-	useEffect(() => {
-		downloadBlob().catch(console.error);
-	}, [src]);
 
 	const handleKeyDown = (e: KeyboardEvent<HTMLVideoElement>) => {
 		switch (e.key) {
@@ -25,18 +14,15 @@ const Video: FC<{ src: string; }> = ({ src }) => {
 		}
 	};
 
-	if (blobURL !== '') {
-		return (
-			<video
-				onKeyDown={handleKeyDown}
-				onClick={(e) => togglePlay(e.target as HTMLVideoElement).catch(console.error)}
-				src={blobURL}
-				autoPlay
-				muted
-				loop />
-		);
-	}
-	return <h2>Loading...</h2>;
+	return (
+		<video
+			onKeyDown={handleKeyDown}
+			onClick={(e) => togglePlay(e.target as HTMLVideoElement).catch(console.error)}
+			src={src}
+			autoPlay
+			muted
+			loop />
+	);
 };
 
 export default Video;

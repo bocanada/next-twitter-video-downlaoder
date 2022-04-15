@@ -16,7 +16,7 @@ const Home: NextPage = () => {
     try {
       const json = await getVideos(id);
       const url = getMax(json.videos);
-      setVideoInfo({ URL: url, description: json.text as string, all: json.videos, id: id });
+      setVideoInfo({ URL: url, description: json.text as string, all: json.videos, id: id, username: json.username as string });
     } catch (e) {
       console.error(e);
     }

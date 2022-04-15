@@ -1,9 +1,12 @@
-import { Variants } from '../pages/api/video/[id]';
+import { Variants } from '../mongo/db';
 
 export const getMax = (videos: Variants[]) => {
 	let filteredVideos = [...videos].filter((v) => v.res != "gif");
 	if (!filteredVideos.length) {
 		filteredVideos = videos;
+	}
+	if (!filteredVideos.length) {
+		throw new Error("Couldn't get any video from this URL");
 	}
 	return filteredVideos.reduce((prev, curr) => sortGifLast(prev, curr) === -1 ? prev : curr).url;
 };

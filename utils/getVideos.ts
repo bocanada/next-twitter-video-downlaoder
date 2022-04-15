@@ -1,4 +1,4 @@
-import { Data } from '../pages/api/video/[id]';
+import { Data } from '../mongo/db';
 
 export const getVideos = async (id: string) => {
 	try {
