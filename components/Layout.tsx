@@ -3,11 +3,14 @@ import React, { FC, ReactNode } from 'react';
 import styles from '../styles/Home.module.css';
 import Head from 'next/head';
 
-export const Layout: FC<{ children: ReactNode; title: string; description: string; ogImageURL?: string; }> = ({ title, description, ogImageURL, children }) => {
+type Props = { children: ReactNode; title: string; description: string; ogImageURL?: string; };
+
+export const Layout: FC<Props> = ({ title, description, ogImageURL, children }) => {
 	return (
 		<div className={styles.container}>
 			<Head>
 				<title>{title}</title>
+				<meta name="description" content={description} />
 				{/* Open-Graph stuff */}
 				<meta property="og:title" content={title} />
 				<meta property="og:description" content={description} />
