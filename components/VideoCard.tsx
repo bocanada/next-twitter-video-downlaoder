@@ -7,6 +7,7 @@ import styles from '../styles/Home.module.css';
 export type VideoInfo = {
 	URL: string;
 	description: string;
+	thumb?: string;
 	id?: string;
 	all: Variants[];
 };

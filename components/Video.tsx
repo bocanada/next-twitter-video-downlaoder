@@ -23,12 +23,16 @@ const Video: FC<{ src: string; }> = ({ src }) => {
 			default:
 				break;
 		}
-		console.log(e.key);
 	};
 
 	if (blobURL !== '') {
 		return (
-			<video onKeyDown={handleKeyDown} onClick={(e) => togglePlay(e.target as HTMLVideoElement).catch(console.error)} src={blobURL} autoPlay muted />
+			<video
+				onKeyDown={handleKeyDown}
+				onClick={(e) => togglePlay(e.target as HTMLVideoElement).catch(console.error)}
+				src={blobURL}
+				autoPlay
+				muted />
 		);
 	}
 	return <h2>Loading...</h2>;

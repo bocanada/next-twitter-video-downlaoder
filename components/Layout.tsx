@@ -3,12 +3,14 @@ import React, { FC, ReactNode } from 'react';
 import styles from '../styles/Home.module.css';
 import Head from 'next/head';
 
-export const Layout: FC<{ children: ReactNode; title: string; description: string; }> = ({ title, description, children }) => {
+export const Layout: FC<{ children: ReactNode; title: string; description: string; ogImageURL?: string; }> = ({ title, description, ogImageURL, children }) => {
 	return (
 		<div className={styles.container}>
 			<Head>
 				<title>{title}</title>
-				<meta name="description" content={description} />
+				<meta property="og:title" content={title} />
+				<meta property="og:description" content={description} />
+				{ogImageURL && <meta property="og:image" content={ogImageURL} />}
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 
