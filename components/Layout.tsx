@@ -8,9 +8,14 @@ export const Layout: FC<{ children: ReactNode; title: string; description: strin
 		<div className={styles.container}>
 			<Head>
 				<title>{title}</title>
+				{/* Open-Graph stuff */}
 				<meta property="og:title" content={title} />
 				<meta property="og:description" content={description} />
 				{ogImageURL && <meta property="og:image" content={ogImageURL} />}
+				{/* Twitter stuff */}
+				<meta property="twitter:title" content={title} />
+				<meta property="twitter:card" content="summary_large_image" />
+				{ogImageURL && <meta property="twitter:image" content={ogImageURL} />}
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 
