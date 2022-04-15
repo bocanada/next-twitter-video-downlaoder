@@ -4,12 +4,6 @@ import { Layout } from '../components/Layout';
 import VideoCard, { VideoInfo } from '../components/VideoCard';
 import { getMax } from '../utils/sort';
 
-type Props = {
-	videoUrl: string;
-	description: string;
-	id: string;
-};
-
 export const getServerSideProps: GetServerSideProps = async ({ res, query }) => {
 	res.setHeader(
 		'Cache-Control',
