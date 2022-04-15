@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { getVideos } from '../utils/getVideos';
 import { Layout } from '../components/Layout';
 import VideoCard, { VideoInfo } from '../components/VideoCard';
+import { sortGifLast } from '../utils/sort';
 
 
 const Home: NextPage = () => {
@@ -14,7 +15,7 @@ const Home: NextPage = () => {
     console.log(`Getting new tweet ${id}`);
     try {
       const json = await getVideos(id);
-      const max = json.videos.reduce((prev, curr) => prev.res > curr.res ? prev : curr);
+      const max = json.videos.reduce((prev, curr) => sortGifLast(prev, curr) === -1 ? prev : curr);
       setVideoInfo({ URL: max.url, description: json.text as string, all: json.videos, id: id });
     } catch (e) {
       console.error(e);
