@@ -2,7 +2,7 @@ import type { GetServerSideProps, NextPage } from 'next';
 import { getVideos } from '../utils/getVideos';
 import { Layout } from '../components/Layout';
 import VideoCard, { VideoInfo } from '../components/VideoCard';
-import { sortGifLast } from '../utils/sort';
+import { getMax } from '../utils/sort';
 
 type Props = {
 	videoUrl: string;
@@ -13,14 +13,12 @@ type Props = {
 export const getServerSideProps: GetServerSideProps = async ({ res, query }) => {
 	res.setHeader(
 		'Cache-Control',
-		'public, s-maxage=60, stale-while-revalidate=59'
+		'public, s-maxage=120, stale-while-revalidate=59'
 	);
 	const { id } = query;
 	const response = await getVideos(id as string);
 	try {
-		// First try filtering gifs, if after filtering all gifs there are no videos, reduce on all videos
-		const url = (response.videos.filter((v) => v.res != "gif") || response.videos)
-			.reduce((prev, curr) => sortGifLast(prev, curr) === -1 ? prev : curr).url;
+		const url = getMax(response.videos);
 		return {
 			props: {
 				URL: url,
@@ -30,7 +28,8 @@ export const getServerSideProps: GetServerSideProps = async ({ res, query }) => 
 				id: id,
 			},
 		};
-	} catch {
+	} catch (e) {
+		console.error(e);
 		throw new Error(`Couldn't fetch any video with id ${id}`);
 	};
 };
